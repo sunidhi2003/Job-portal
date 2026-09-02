@@ -1,0 +1,5 @@
+node_modules/
+hirehub.db
+.env
+uploads/*
+!uploads/.gitkeep
