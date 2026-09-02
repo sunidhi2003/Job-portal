@@ -21,7 +21,29 @@ async function loadJobs(params=""){const jobs=await api("/api/jobs"+params);$("#
 async function searchJobs(e){e.preventDefault();const f=new FormData(e.target);const q=new URLSearchParams(Object.fromEntries(f));await loadJobs("?"+q)}
 async function jobDetails(id){const j=await api("/api/jobs/"+id);const resumes=user?.role==="candidate"?await api("/api/resumes/me"):[];layout(`<div class="card"><button class="btn ghost" onclick="go('jobs')">← Back</button><div style="margin-top:20px"><span class="tag">${j.location}</span><h1>${j.title}</h1><h3>${j.company}</h3><p class="muted">${j.salary||"Competitive salary"} · Posted ${new Date(j.created_at).toLocaleDateString()}</p><h3>Skills</h3><div>${j.skills.split(",").map(s=>`<span class="tag">${s.trim()}</span>`).join("")}</div><h3>Description</h3><p style="white-space:pre-wrap">${j.description}</p>${user?.role==="candidate"?`<hr><h3>Apply with your resume</h3>${resumes.length?`<select id="applyResume" class="select">${resumes.map(r=>`<option value="${r.id}">${r.original_name}</option>`).join("")}</select><button class="btn" style="margin-top:12px" onclick="apply(${j.id})">Submit Application</button>`:`<div class="notice">Upload a resume from your dashboard before applying.</div>`}`:`<div class="notice">Login as a candidate to apply for this position.</div>`}</div></div>`)}
 async function apply(jobId){try{await api("/api/applications",{method:"POST",body:{jobId,resumeId:Number($("#applyResume").value)}});toast("Application submitted successfully");go("candidate")}catch(e){toast(e.message,true)}}
-async function candidateDash(){if(user?.role!=="candidate")return go("login");const [apps,resumes]=await Promise.all([api("/api/applications/me"),api("/api/resumes/me")]);layout(`<div class="row between"><div><h1>Candidate Dashboard</h1><p class="muted">Welcome, ${user.name}.</p></div><button class="btn" onclick="go('jobs')">Browse Jobs</button></div><div class="stats"><div class="stat"><strong>${apps.length}</strong><span class="muted">Applications</span></div><div class="stat"><strong>${resumes.length}</strong><span class="muted">Resumes</span></div><div class="stat"><strong>${apps.filter(a=>a.status==="shortlisted").length}</strong><span class="muted">Shortlisted</span></div></div><div class="grid two"><section class="card"><h2>My Resume</h2><form onsubmit="uploadResume(event)"><input class="input" type="file" name="resume" accept=".pdf,.doc,.docx" required><button class="btn">Upload Resume</button></form>${resumes.map(r=>`<div class="row between" style="margin-top:14px"><span>${r.original_name}</span><span class="row"><button class="btn secondary" onclick="downloadFile('/api/resumes/${r.id}/export/pdf')">PDF</button><button class="btn secondary" onclick="downloadFile('/api/resumes/${r.id}/export/docx')">DOCX</button></span></div>`).join("")}</section><section class="card"><h2>Application Tracker</h2>${apps.length?apps.map(a=>`<div style="padding:13px 0;border-bottom:1px solid var(--border)"><div class="row between"><b>${a.title}</b><span class="status ${a.status}">${a.status}</span></div><span class="muted">${a.company} · ${a.location}</span></div>`).join(""):`<div class="empty">No applications yet.</div>`}</section></div>`)}
+async function candidateDash(){if(user?.role!=="candidate")return go("login");const [apps,resumes]=await Promise.all([api("/api/applications/me"),api("/api/resumes/me")]);layout(`<div class="row between"><div><h1>Candidate Dashboard</h1><p class="muted">Welcome, ${user.name}.</p></div><button class="btn" onclick="go('jobs')">Browse Jobs</button></div>
+<div class="stats">
+  <div class="stat">
+    <strong>${apps.length}</strong>
+    <span class="muted">Applications</span>
+  </div>
+
+  <div class="stat">
+    <strong>${resumes.length}</strong>
+    <span class="muted">Resumes</span>
+  </div>
+
+  <div class="stat">
+    <strong>${apps.filter(a=>a.status==="shortlisted").length}</strong>
+    <span class="muted">Shortlisted</span>
+  </div>
+
+  <div class="stat">
+    <strong>${apps.filter(a=>a.status==="hired").length}</strong>
+    <span class="muted">Hired</span>
+  </div>
+</div>
+    <div class="grid two"><section class="card"><h2>My Resume</h2><form onsubmit="uploadResume(event)"><input class="input" type="file" name="resume" accept=".pdf,.doc,.docx" required><button class="btn">Upload Resume</button></form>${resumes.map(r=>`<div class="row between" style="margin-top:14px"><span>${r.original_name}</span><span class="row"><button class="btn secondary" onclick="downloadFile('/api/resumes/${r.id}/export/pdf')">PDF</button><button class="btn secondary" onclick="downloadFile('/api/resumes/${r.id}/export/docx')">DOCX</button></span></div>`).join("")}</section><section class="card"><h2>Application Tracker</h2>${apps.length?apps.map(a=>`<div style="padding:13px 0;border-bottom:1px solid var(--border)"><div class="row between"><b>${a.title}</b><span class="status ${a.status}">${a.status}</span></div><span class="muted">${a.company} · ${a.location}</span></div>`).join(""):`<div class="empty">No applications yet.</div>`}</section></div>`)}
 async function uploadResume(e){e.preventDefault();const f=new FormData(e.target);try{await api("/api/resumes",{method:"POST",body:f});toast("Resume uploaded");candidateDash()}catch(x){toast(x.message,true)}}
 
 async function downloadFile(url){
