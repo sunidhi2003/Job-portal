@@ -57,7 +57,7 @@ async function downloadFile(url){
     });
 
     if(!response.ok){
-      throw new Error("Unable to open resume");
+      throw new Error("Unable to open the resume");
     }
 
     const blob = await response.blob();
