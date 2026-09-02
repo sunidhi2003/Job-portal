@@ -95,3 +95,24 @@ git push -u origin main
 ```
 
 Do not commit real passwords, secret keys, or private resumes. The included JWT secret is only a development fallback; use `JWT_SECRET` as an environment variable for production.
+
+## Features
+
+- Candidate and recruiter authentication
+- Role-based access control
+- Resume upload and download
+- Job posting and job browsing
+- Job application management
+- Recruiter application approval/rejection
+- Candidate application tracking
+- PDF and DOCX resume export
+- Job search and filtering
+- Application status pipeline
+
+## Tech Stack
+
+- Node.js
+- Express.js
+- JWT Authentication
+- bcrypt
+- HTML, CSS, JavaScript
